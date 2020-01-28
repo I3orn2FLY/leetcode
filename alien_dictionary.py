@@ -62,6 +62,5 @@ print(res)
 
 res = alienOrder(['eff', 'fg'])
 print(res)
-res = alienOrder(["wrt","wrf","er","ett","rftt","te"])
+res = alienOrder(["wrt", "wrf", "er", "ett", "rftt", "te"])
 print(res)
-
