@@ -8,15 +8,6 @@ class ListNode:
         return str(self.val)
 
 
-def printlist(node):
-    s = ""
-    while node:
-        s += str(node.val) + " "
-        node = node.next
-
-    print(s)
-
-
 def reverse(head):
     if head is None or head.next is None:
         return head
@@ -50,15 +41,28 @@ class Solution:
             last.next, last = head, last.next
 
 
-inp = [1, 2, 3, 4, 5]
-head = ListNode(inp[0])
-curr = head
-for i in range(1, len(inp)):
-    curr.next = ListNode(inp[i])
-    curr = curr.next
+def build_list(inp):
+    head = ListNode(inp[0])
+    curr = head
+    for i in range(1, len(inp)):
+        curr.next = ListNode(inp[i])
+        curr = curr.next
+
+    return head
+
+
+def printlist(node):
+    s = ""
+    while node:
+        s += str(node.val) + " "
+        node = node.next
+
+    print(s)
+
 
 s = Solution()
 
+head = build_list([1, 2, 3, 4, 5])
 s.reorderList(head)
 
 printlist(head)
