@@ -1,7 +1,5 @@
 class Solution:
 
-
-
     def bfs(self, matrix, i, j, res):
         if matrix[i][j] == '0':
             return 0
