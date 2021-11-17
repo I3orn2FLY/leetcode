@@ -7,60 +7,26 @@ class Solution(object):
         if len(nums) < 2:
             return 0
 
+        cur_i = 0
+        jump_count = 0
+        while cur_i < len(nums) - 1:
+            jump_count += 1
+            if cur_i + nums[cur_i] >= len(nums) - 1:
+                break
+            max_idx = cur_i
+            next_i = cur_i
+            for j in range(cur_i + 1, min(cur_i + nums[cur_i] + 1, len(nums))):
+                if max_idx < j + nums[j]:
+                    max_idx = j + nums[j]
+                    next_i = j
 
-        los = [0]
-        mss = [0]
-        for i in range(1, len(nums)):
-            ms = float("inf")
-            for j in range(i):
-                diff = j + los[j] - i
-                if diff < 0:
-                    # cannot be reached from that index
-                    continue
-                if mss[j] < ms:
-                    ms = mss[j]
-            lo = -1
-            for j in range(i):
-                diff = j + los[j] - i
-                if diff < 0:
-                    # cannot be reached from that index
-                    continue
-                if mss[j] == ms:
-                    lo = max(diff, lo)
-            if lo >= 0:
-                mss.append(ms)
-                los.append(lo)
-                # this index can be reached by someones leftovers
-                continue
+            cur_i = next_i
 
-            # this index cannot be reached by someones leftovers:
-            for j in range(i):
-                diff = j + nums[j] - i
-                if diff < 0:
-                    # cannot be reached after taking step from j index
-                    continue
-                # can be reached after taking step from j index
-                if mss[j] + 1 < ms:
-                    ms = mss[j] + 1
+        return jump_count
 
-            lo = -1
-            for j in range(i):
-                diff = j + nums[j] - i
-                if diff < 0:
-                    # cannot be reached after taking step from j index
-                    continue
-                # can be reached after taking step from j index
-                if mss[j] + 1 == ms:
-                    lo = max(diff, lo)
-
-            mss.append(ms)
-            los.append(lo)
-
-
-        return mss[-1]
 
 
 s = Solution()
-nums = [2,3,0,1,4]
-# nums = [2, 3, 1, 1, 4]
+# nums = [3, 2, 1]
+nums = [2, 3, 1, 1, 4]
 print(s.jump(nums))
