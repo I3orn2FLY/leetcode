@@ -1,66 +1,81 @@
-def idx(c):
-    return ord(c) - ord('a')
+from typing import List
 
 
-def alienOrder(words):
-    nodes = set()
-    for word in words:
-        for c in word:
-            nodes.add(c)
+class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+        G = dict()
+        G_rev = dict()
+        max_len = 0
+        for word in words:
+            max_len = max(len(word), max_len)
+            for ch in word:
+                G[ch] = G.get(ch, set())
+                G_rev[ch] = G_rev.get(ch, set())
 
-    G = {node: set() for node in nodes}
+        for j in range(max_len):
+            for i in range(1, len(words)):
+                prev_word = words[i - 1]
+                cur_word = words[i]
+                if j == len(cur_word) and len(prev_word) > j and cur_word == prev_word[:j]:
+                    return ""
+                if j >= len(cur_word) or j >= len(prev_word):
+                    continue
+                prev_char = prev_word[j]
+                cur_char = cur_word[j]
+                if prev_word[:j] == cur_word[:j] and prev_char != cur_char:
+                    G[prev_char].add(cur_char)
+                    G_rev[cur_char].add(prev_char)
 
-    for i in range(len(words) - 1):
-        for j in range(min(len(words[i]), len(words[i + 1]))):
-            c1, c2 = words[i][j], words[i + 1][j]
-            if c1 != c2:
-                G[c2].add(c1)
-                break
+        status = {node: 0 for node in G}
 
-    visited = [True] * 26
+        # 0 not checked
+        # 1 being checked
+        # 2 checked and no cycle
+        # 3 checked and cycle
 
-    for node in nodes:
-        visited[idx(node)] = False
+        def get_cycle_status(node):
+            if status[node] == 1:
+                status[node] = 3
+            elif status[node] == 0:
+                status[node] = 1
+                for neighbor in G[node]:
+                    get_cycle_status(neighbor)
+                    if status[neighbor] == 3:
+                        status[node] = 3
+                        return
+                status[node] = 2
 
-    stack_seen = [False] * 26
+        for node in G:
+            get_cycle_status(node)
+            if status[node] == 3:
+                return ""
 
-    res = []
-    for node in nodes:
-        if not visited[idx(node)]:
-            stack = [node]
-            stack_seen[idx(node)] = True
-            visited[idx(node)] = True
-            while stack:
-                vertex = stack[-1]
-                rm = True
-                for v in G[vertex]:
-                    if stack_seen[idx(v)]:
-                        return ""
-                    if not visited[idx(v)]:
-                        stack.append(v)
-                        stack_seen[idx(v)] = True
-                        visited[idx(v)] = True
-                        rm = False
-                        break
+        res = []
 
-                if rm:
-                    stack_seen[idx(vertex)] = False
-                    res.append(stack.pop())
+        while G:
+            level = [node for node in G if not G_rev[node]]
+            for node in level:
+                if not G_rev[node]:
+                    res.append(node)
+                    for neighbor in G[node]:
+                        G_rev[neighbor].remove(node)
+                    del G[node]
 
-    return "".join(res)
+        return "".join(res)
 
 
-res = alienOrder([
+s = Solution()
+print(s.alienOrder([
     "wrt",
     "wrf",
     "er",
     "ett",
     "rftt"
-])
+]))
 
-print(res)
-
-res = alienOrder(['eff', 'fg'])
-print(res)
-res = alienOrder(["wrt", "wrf", "er", "ett", "rftt", "te"])
-print(res)
+print(s.alienOrder([
+    "z", "x", "z"
+]))
+print(s.alienOrder([
+    "z", "x"
+]))
