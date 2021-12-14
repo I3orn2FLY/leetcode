@@ -1,3 +1,5 @@
+# this solution is not optimal, optimal is solved by stack principles
+# even more optimal is done without stack if current number and result are kept in different variables
 class Solution:
 
     def calculate(self, s: str) -> int:
