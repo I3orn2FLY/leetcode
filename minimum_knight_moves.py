@@ -7,25 +7,21 @@ class Solution:
 
 
         positions = [(0, 0)]
-        visited = set()
+        visited = {positions[0]}
         moves = 0
         while positions:
             next_positions = []
             for position in positions:
                 if position == (x, y):
                     return moves
-                visited.add(position)
 
                 for neighbor in get_next_positions(position[0], position[1]):
                     if neighbor not in visited:
                         next_positions.append(neighbor)
+                        visited.add(neighbor)
+
 
             positions = next_positions
             moves += 1
 
         return moves
-
-
-s = Solution()
-
-print(s.minKnightMoves(5, 5))
