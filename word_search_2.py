@@ -1,78 +1,66 @@
-def idx(char):
-    return ord(char) - ord('a')
+from typing import List
 
 
-def dfs(board, trie, i, j, res):
-    if i >= len(board) or j >= len(board[0]) or i < 0 or j < 0 or board[i][j] == '#':
-        return
-
-    trie = trie.children[idx(board[i][j])]
-    if trie is None:
-        return
-
-    if trie.word:
-        res.append(trie.word)
-        trie.word = None
-
-    tmp = board[i][j]
-
-    board[i][j] = '#'
-
-    dfs(board, trie, i + 1, j, res)
-    dfs(board, trie, i - 1, j, res)
-    dfs(board, trie, i, j + 1, res)
-    dfs(board, trie, i, j - 1, res)
-
-    board[i][j] = tmp
-
-
-class Trie():
-    def __init__(self, word=None):
-        self.children = [None] * 26
-        self.word = word
-
-    def __repr__(self):
-        return ""
-
-
-def build_trie(words):
-    root = Trie()
-    for word in words:
-        trie = root
-        for c in word:
-            i = idx(c)
-            if trie.children[i] is None:
-                trie.children[i] = Trie()
-
-            trie = trie.children[i]
-
-        trie.word = word
-
-    return root
+class Trie:
+    def __init__(self, is_word=False):
+        self.nodes = dict()
+        self.is_word = is_word
 
 
 class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
 
-    def findWords(self, board, words):
-        if not board or not board[0]:
-            return []
+        trie = Trie()
+
+        for word in words:
+            cur_trie = trie
+            for i in range(len(word)):
+                ch = word[i]
+                if ch not in cur_trie.nodes:
+                    cur_trie.nodes[ch] = Trie()
+                cur_trie = cur_trie.nodes[ch]
+
+            cur_trie.is_word = True
 
         m = len(board)
         n = len(board[0])
 
         res = []
 
-        root = build_trie(words)
+        def dfs(i, j, trie, path):
+
+            ch = board[i][j]
+            if ch == "#" or ch not in trie.nodes:
+                return
+
+            path = path + ch
+            trie = trie.nodes[ch]
+
+            if trie.is_word:
+                trie.is_word = False
+                res.append(path)
+
+            board[i][j] = "#"
+
+            if i > 0:
+                dfs(i - 1, j, trie, path)
+            if i < m - 1:
+                dfs(i + 1, j, trie, path)
+            if j > 0:
+                dfs(i, j - 1, trie, path)
+            if j < n - 1:
+                dfs(i, j + 1, trie, path)
+
+            board[i][j] = ch
 
         for i in range(m):
             for j in range(n):
-                dfs(board, root, i, j, res)
+                dfs(i, j, trie, "")
 
         return res
 
 
 s = Solution()
 
-res = s.findWords([["o", "a", "a", "n"], ["e", "t", "a", "e"], ["i", "h", "k", "r"], ["i", "f", "l", "v"]],
-                  ["oath", "pea", "eat", "rain"])
-print(res)
+print(s.findWords([["a", "b"], ["a", "a"]],
+                  ["aba", "baa", "bab", "aaab", "aaa", "aaaa", "aaba"]))

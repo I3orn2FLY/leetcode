@@ -1,77 +1,80 @@
-class Node:
-
-    def __init__(self, k, v):
-        self.key = k
-        self.val = v
-        self.prev = None
+class DLL():
+    def __init__(self, key: int, val: int):
+        self.val = val
+        self.key = key
         self.next = None
+        self.prev = None
+
+    def __repr__(self):
+        return str(self.key) + ':' + str(self.val)
 
 
 class LRUCache:
 
     def __init__(self, capacity: int):
-        self.front = self.back = None
-        self.cache = dict()
         self.cap = capacity
-        self.size = 0
+        self.cache = dict()
+        self.start = None
+        self.end = None
 
     def get(self, key: int) -> int:
-        node = self.cache.get(key)
-        if node:
-            self._remove(node)
-            self._push(node)
-            return node.key
+        if key in self.cache:
+            node = self.cache[key]
+            self.delete(key)
+            self.append(node)
+            return node.val
         else:
-            return - 1
+            return -1
+
+    def delete(self, key):
+        if key not in self.cache:
+            return
+        node = self.cache[key]
+        del self.cache[node.key]
+
+        if node == self.start and node == self.end:
+            self.start = None
+            self.end = None
+
+        elif node == self.start:
+            self.start = node.next
+            self.start.prev = None
+
+        elif node == self.end:
+            self.end = self.end.prev
+            self.end.next = None
+        else:
+            l = node.prev
+            r = node.next
+            l.next, r.prev = r, l
+
+    def append(self, node):
+        if not self.cache:
+            self.start = node
+        else:
+            self.end.next, node.prev = node, self.end
+
+        self.end = node
+        self.cache[node.key] = node
 
     def put(self, key: int, value: int) -> None:
-        found_node = self.cache.get(key)
-        if found_node:
-            self._remove(self.cache[key])
-        elif self.size == self.cap:
-            self._remove(self.front)
+        node = DLL(key, value)
 
-        node = Node(key, value)
-        self._push(node)
+        self.delete(key)
 
-    def _push(self, node):
-        if self.size == 0:
-            self.back = node
-            self.front = node
-        else:
-            self.back.next = node
-            node.prev = self.back
-            self.back = node
-
-        self.cache[node.key] = node
-        self.size += 1
-
-    def _remove(self, node):
-        if node.prev:
-            node.prev.next = node.next
-
-        if node.next:
-            node.next.prev = node.prev
-
-        if node == self.back:
-            self.back = self.back.prev
-
-        if node == self.front:
-            self.front = self.front.next
-
-        del self.cache[node.key]
-        self.size -= 1
+        if len(self.cache) == self.cap:
+            self.delete(self.start.key)
+        self.append(node)
 
 
-commands = ["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
-arguments = [[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
-lru_cache = None
-
-for com, arg in zip(commands, arguments):
-    if com == "LRUCache":
-        lru_cache = LRUCache(*arg)
-    elif com == "put":
-        lru_cache.put(*arg)
-
-    elif com == "get":
-        lru_cache.get(*arg)
+# Your LRUCache object will be instantiated and called as such:
+lRUCache = LRUCache(2)
+print("put 1", lRUCache.put(1, 1))
+print("put 2", lRUCache.put(2, 2))
+print("get 1", lRUCache.get(1))
+print("put 3", lRUCache.put(3, 3))
+print("get 2", lRUCache.get(2))
+print("put 4", lRUCache.put(4, 4))
+print("get 1", lRUCache.get(1))
+print("get 3", lRUCache.get(3))
+print("get 4", lRUCache.get(4))
